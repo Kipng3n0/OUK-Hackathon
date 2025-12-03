@@ -177,7 +177,7 @@ walker skill_analyzer_agent {
 }
 
 impl skill_analyzer_agent.analyze {
-    let user_nodes = root --> (?User);
+    let user_nodes = [root --> (?User)];
     if not user_nodes {
         report "no_user";
     }
@@ -185,7 +185,7 @@ impl skill_analyzer_agent.analyze {
 
     let extracted = extract_skills_from_resume(self.resume_text);
     for skill_name in extracted {
-        let existing = root --> (?Skill(name == skill_name));
+        let existing = [root --> (?Skill(name == skill_name))];
         let skill_node;
         if existing {
             skill_node = existing[0];
@@ -222,11 +222,11 @@ walker progress_mentor_agent {
 }
 
 impl progress_mentor_agent.summarize {
-    let user_nodes = root --> (?User);
+    let user_nodes = [root --> (?User)];
     let names = [];
     if user_nodes {
         let u = user_nodes[0];
-        let skills = u --> (?HasSkill) --> (?Skill);
+        let skills = [u --> (?Skill)];
         for s in skills {
             names.append(s.name);
         }
@@ -256,7 +256,7 @@ walker get_skill_graph {
 }
 
 impl get_skill_graph.for_user {
-    let skills = root --> (?Skill);
+    let skills = [root --> (?Skill)];
     report skills;
 }
 
@@ -266,29 +266,21 @@ walker career_readiness_agent {
 }
 
 impl career_readiness_agent.score {
-    let user_nodes = root --> (?User);
-    let career_nodes = root --> (?Career(title == self.target_career_title));
+    let user_nodes = [root --> (?User)];
+    let career_nodes = [root --> (?Career(title == self.target_career_title))];
     if not user_nodes or not career_nodes {
         report 0.0;
     }
     let user = user_nodes[0];
-    let career = career_nodes[0];
 
-    let required_skills = (?Skill) <== (?Requires) <== career;
-    let user_skills = user --> (?HasSkill) --> (?Skill);
+    let required_skills = [root --> (?Skill)];
+    let user_skills = [user --> (?Skill)];
 
-    let total_weight = 0;
-    let acquired_weight = 0;
+    let total = 0;
+    let matched = 0;
 
     for rs in required_skills {
-        let req_edges = rs +> (?Requires) +> career;
-        if not req_edges {
-            continue;
-        }
-        let req_edge = req_edges[0];
-        let weight = req_edge.criticality;
-        total_weight += weight;
-
+        total += 1;
         let has_it = false;
         for us in user_skills {
             if us.name == rs.name {
@@ -297,16 +289,16 @@ impl career_readiness_agent.score {
             }
         }
         if has_it {
-            acquired_weight += weight;
+            matched += 1;
         }
     }
 
-    if total_weight == 0 {
+    if total == 0 {
         report 0.0;
     }
-    let score = (acquired_weight as float) / (total_weight as float);
-    let user = user_nodes[0];
-    user.readiness_score = score;
+    let score = (matched as float) / (total as float);
+    let u = user_nodes[0];
+    u.readiness_score = score;
     report score;
 }
 
@@ -316,46 +308,26 @@ walker learning_path_agent {
 }
 
 impl learning_path_agent.plan {
-    let user_nodes = root --> (?User);
-    let career_nodes = root --> (?Career(title == self.target_career_title));
+    let user_nodes = [root --> (?User)];
+    let career_nodes = [root --> (?Career(title == self.target_career_title))];
     if not user_nodes or not career_nodes {
         report [];
     }
     let user = user_nodes[0];
-    let career = career_nodes[0];
 
-    let required_skills = (?Skill) <== (?Requires) <== career;
-    let user_skills = user --> (?HasSkill) --> (?Skill);
+    let required_skills = [root --> (?Skill)];
+    let user_skills = [user --> (?Skill)];
 
     let user_skill_names = [];
     for us in user_skills {
         user_skill_names.append(us.name);
     }
 
-    let gaps = [];
+    let ordered = [];
     for rs in required_skills {
         if rs.name not in user_skill_names {
-            gaps.append(rs);
+            ordered.append(rs.name);
         }
-    }
-
-    let ordered = [];
-    let visited = set();
-
-    def dfs(skill_node: Skill) {
-        if skill_node.name in visited {
-            return;
-        }
-        visited.add(skill_node.name);
-        let prereq_skills = (?Skill) <== (?PrerequisiteFor) <== skill_node;
-        for ps in prereq_skills {
-            dfs(ps);
-        }
-        ordered.append(skill_node.name);
-    }
-
-    for g in gaps {
-        dfs(g);
     }
 
     report ordered;
@@ -375,7 +347,7 @@ impl market_intelligence_agent.update {
     for desc in descriptions {
         let skills = extract_skills_from_job(desc);
         for s_name in skills {
-            let existing = root --> (?Skill(name == s_name));
+            let existing = [root --> (?Skill(name == s_name))];
             if existing {
                 let s = existing[0];
                 s.market_demand += 0.05;
@@ -383,7 +355,7 @@ impl market_intelligence_agent.update {
         }
     }
 
-    let all_skills = root --> (?Skill);
+    let all_skills = [root --> (?Skill)];
     let max_val = 0.0;
     for s in all_skills {
         if s.market_demand > max_val {
@@ -404,23 +376,23 @@ walker mentor_match_agent {
 }
 
 impl mentor_match_agent.match {
-    let user_nodes = root --> (?User);
+    let user_nodes = [root --> (?User)];
     if not user_nodes {
         report [];
     }
     let user = user_nodes[0];
 
-    let learning_skills = user --> (?Learning) --> (?LearningModule) --> (?Teaches) --> (?Skill);
+    let learning_skills = [user --> (?Skill)];
     let learning_names = [];
     for s in learning_skills {
         learning_names.append(s.name);
     }
 
-    let mentors = root --> (?Mentor);
+    let mentors = [root --> (?Mentor)];
     let results = [];
 
     for m in mentors {
-        let expert_skills = m +> (?ExpertIn) +> (?Skill);
+        let expert_skills = [m --> (?Skill)];
         let overlap = 0;
         for es in expert_skills {
             if es.name in learning_names {
