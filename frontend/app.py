@@ -22,11 +22,11 @@ def page_dashboard():
     target_career = st.text_input("Target career title", value="AI Engineer")
 
     if st.button("Compute career readiness"):
-        data = call_walker("career_readiness_agent.score", {"target_career_title": target_career})
+        data = call_walker("career_readiness_agent", {"target_career_title": target_career})
         st.write("Raw response:", data)
 
     if st.button("Plan learning path"):
-        data = call_walker("learning_path_agent.plan", {"target_career_title": target_career})
+        data = call_walker("learning_path_agent", {"target_career_title": target_career})
         st.subheader("Recommended Skill Sequence")
         st.write(data)
 
@@ -35,9 +35,10 @@ def page_skill_graph():
     st.title("Skill Graph Snapshot")
 
     if st.button("Refresh skills"):
-        data = call_walker("get_skill_graph.for_user", {})
-        st.write("Raw skills from backend:")
-        st.json(data)
+        data = call_walker("get_skill_graph", {})
+        if data is not None:
+            st.write("Raw skills from backend:")
+            st.json(data)
 
 
 def page_coding_challenge():
@@ -47,28 +48,31 @@ def page_coding_challenge():
     level = st.selectbox("Level", ["beginner", "intermediate", "advanced"], index=0)
 
     if st.button("Generate challenge"):
-        challenge = call_walker("content_curator_agent.generate", {"skill_name": skill, "level": level})
-        st.subheader("Challenge")
-        st.json(challenge)
+        challenge = call_walker("content_curator_agent", {"skill_name": skill, "level": level})
+        if challenge is not None:
+            st.subheader("Challenge")
+            st.json(challenge)
 
     code = st.text_area("Your solution code", height=200)
 
     if st.button("Evaluate submission") and code.strip():
         result = call_walker(
-            "evaluation_agent.evaluate",
+            "evaluation_agent",
             {"code": code, "skill_name": skill, "level": level},
         )
-        st.subheader("AI Feedback")
-        st.json(result)
+        if result is not None:
+            st.subheader("AI Feedback")
+            st.json(result)
 
 
 def page_mentor_match():
     st.title("Mentor Matching")
 
     if st.button("Find mentors"):
-        matches = call_walker("mentor_match_agent.match", {})
-        st.subheader("Recommended Mentors")
-        st.json(matches)
+        matches = call_walker("mentor_match_agent", {})
+        if matches is not None:
+            st.subheader("Recommended Mentors")
+            st.json(matches)
 
 
 def main():

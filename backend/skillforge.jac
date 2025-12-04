@@ -76,6 +76,9 @@ def extract_skills_from_job(job_description: str) -> list by llm();
 def generate_motivation_message(struggle_areas: list) -> str by llm();
 
 walker seed_demo_data {
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can run with root entry;
 }
 
@@ -173,6 +176,9 @@ impl seed_demo_data.run {
 
 walker skill_analyzer_agent {
     has resume_text: str;
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can analyze with root entry;
 }
 
@@ -185,6 +191,9 @@ impl skill_analyzer_agent.analyze {
 walker content_curator_agent {
     has skill_name: str;
     has level: str;
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can generate with root entry;
 }
 
@@ -194,6 +203,9 @@ impl content_curator_agent.generate {
 }
 
 walker progress_mentor_agent {
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can summarize with root entry;
 }
 
@@ -207,6 +219,9 @@ walker evaluation_agent {
     has code: str;
     has skill_name: str;
     has level: str;
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can evaluate with root entry;
 }
 
@@ -220,6 +235,9 @@ impl evaluation_agent.evaluate {
 }
 
 walker get_skill_graph {
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can for_user with root entry;
 }
 
@@ -230,6 +248,9 @@ impl get_skill_graph.for_user {
 
 walker career_readiness_agent {
     has target_career_title: str;
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can score with root entry;
 }
 
@@ -240,6 +261,9 @@ impl career_readiness_agent.score {
 
 walker learning_path_agent {
     has target_career_title: str;
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can plan with root entry;
 }
 
@@ -249,6 +273,9 @@ impl learning_path_agent.plan {
 }
 
 walker market_intelligence_agent {
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can update with root entry;
 }
 
@@ -257,6 +284,9 @@ impl market_intelligence_agent.update {
 }
 
 walker mentor_match_agent {
+    obj __specs__ {
+        static has auth: bool = False;
+    }
     can match with root entry;
 }
 
