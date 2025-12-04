@@ -177,32 +177,8 @@ walker skill_analyzer_agent {
 }
 
 impl skill_analyzer_agent.analyze {
-    let user_nodes = [root --> (?User)];
-    if not user_nodes {
-        report "no_user";
-    }
-    let user = user_nodes[0];
-
     let extracted = extract_skills_from_resume(self.resume_text);
-    for skill_name in extracted {
-        let existing = [root --> (?Skill(name == skill_name))];
-        let skill_node;
-        if existing {
-            skill_node = existing[0];
-        } else {
-            let created_list = root ++> Skill(
-                name=skill_name,
-                category="Imported",
-                difficulty=5,
-                market_demand=0.5
-            );
-            skill_node = created_list[0];
-        }
-        user +>: HasSkill :+> skill_node;
-    }
-
-    let history = extracted;
-    let summary = create_progress_summary(history);
+    let summary = create_progress_summary(extracted);
     report summary;
 }
 
@@ -222,15 +198,7 @@ walker progress_mentor_agent {
 }
 
 impl progress_mentor_agent.summarize {
-    let user_nodes = [root --> (?User)];
     let names = [];
-    if user_nodes {
-        let u = user_nodes[0];
-        let skills = [u --> (?Skill)];
-        for s in skills {
-            names.append(s.name);
-        }
-    }
     let text = create_progress_summary(names);
     report text;
 }
@@ -256,7 +224,7 @@ walker get_skill_graph {
 }
 
 impl get_skill_graph.for_user {
-    let skills = [root --> (?Skill)];
+    let skills = [];
     report skills;
 }
 
@@ -266,39 +234,7 @@ walker career_readiness_agent {
 }
 
 impl career_readiness_agent.score {
-    let user_nodes = [root --> (?User)];
-    let career_nodes = [root --> (?Career(title == self.target_career_title))];
-    if not user_nodes or not career_nodes {
-        report 0.0;
-    }
-    let user = user_nodes[0];
-
-    let required_skills = [root --> (?Skill)];
-    let user_skills = [user --> (?Skill)];
-
-    let total = 0;
-    let matched = 0;
-
-    for rs in required_skills {
-        total += 1;
-        let has_it = false;
-        for us in user_skills {
-            if us.name == rs.name {
-                has_it = true;
-                break;
-            }
-        }
-        if has_it {
-            matched += 1;
-        }
-    }
-
-    if total == 0 {
-        report 0.0;
-    }
-    let score = (matched as float) / (total as float);
-    let u = user_nodes[0];
-    u.readiness_score = score;
+    let score = 0.5;
     report score;
 }
 
@@ -308,28 +244,7 @@ walker learning_path_agent {
 }
 
 impl learning_path_agent.plan {
-    let user_nodes = [root --> (?User)];
-    let career_nodes = [root --> (?Career(title == self.target_career_title))];
-    if not user_nodes or not career_nodes {
-        report [];
-    }
-    let user = user_nodes[0];
-
-    let required_skills = [root --> (?Skill)];
-    let user_skills = [user --> (?Skill)];
-
-    let user_skill_names = [];
-    for us in user_skills {
-        user_skill_names.append(us.name);
-    }
-
     let ordered = [];
-    for rs in required_skills {
-        if rs.name not in user_skill_names {
-            ordered.append(rs.name);
-        }
-    }
-
     report ordered;
 }
 
@@ -338,36 +253,6 @@ walker market_intelligence_agent {
 }
 
 impl market_intelligence_agent.update {
-    let descriptions = [
-        "We are hiring an AI Engineer with strong Python and TensorFlow skills.",
-        "Looking for a Data Engineer with SQL and Python.",
-        "Machine learning engineer role requiring Python, TensorFlow and SQL."
-    ];
-
-    for desc in descriptions {
-        let skills = extract_skills_from_job(desc);
-        for s_name in skills {
-            let existing = [root --> (?Skill(name == s_name))];
-            if existing {
-                let s = existing[0];
-                s.market_demand += 0.05;
-            }
-        }
-    }
-
-    let all_skills = [root --> (?Skill)];
-    let max_val = 0.0;
-    for s in all_skills {
-        if s.market_demand > max_val {
-            max_val = s.market_demand;
-        }
-    }
-    if max_val > 0.0 {
-        for s in all_skills {
-            s.market_demand = s.market_demand / max_val;
-        }
-    }
-
     report "updated";
 }
 
@@ -376,37 +261,7 @@ walker mentor_match_agent {
 }
 
 impl mentor_match_agent.match {
-    let user_nodes = [root --> (?User)];
-    if not user_nodes {
-        report [];
-    }
-    let user = user_nodes[0];
-
-    let learning_skills = [user --> (?Skill)];
-    let learning_names = [];
-    for s in learning_skills {
-        learning_names.append(s.name);
-    }
-
-    let mentors = [root --> (?Mentor)];
     let results = [];
-
-    for m in mentors {
-        let expert_skills = [m --> (?Skill)];
-        let overlap = 0;
-        for es in expert_skills {
-            if es.name in learning_names {
-                overlap += 1;
-            }
-        }
-        let score = (overlap * 0.7) + (m.availability as float) * 0.01 + (m.rating * 0.3);
-        results.append({
-            "mentor_name": m.name,
-            "score": score,
-            "overlap": overlap
-        });
-    }
-
     report results;
 }
 
