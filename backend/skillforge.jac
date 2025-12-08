@@ -179,10 +179,10 @@ walker skill_analyzer_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can analyze with root entry;
+    can entry with root entry;
 }
 
-impl skill_analyzer_agent.analyze {
+impl skill_analyzer_agent.entry {
     let extracted = extract_skills_from_resume(self.resume_text);
     let summary = create_progress_summary(extracted);
     report summary;
@@ -194,10 +194,10 @@ walker content_curator_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can generate with root entry;
+    can entry with root entry;
 }
 
-impl content_curator_agent.generate {
+impl content_curator_agent.entry {
     let challenge = generate_coding_challenge(self.skill_name, self.level);
     report challenge;
 }
@@ -206,11 +206,11 @@ walker progress_mentor_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can summarize with root entry;
+    can entry with root entry;
 }
 
-impl progress_mentor_agent.summarize {
-    let names = [];
+impl progress_mentor_agent.entry {
+    let names = ["Python", "TensorFlow", "SQL"];
     let text = create_progress_summary(names);
     report text;
 }
@@ -222,10 +222,10 @@ walker evaluation_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can evaluate with root entry;
+    can entry with root entry;
 }
 
-impl evaluation_agent.evaluate {
+impl evaluation_agent.entry {
     let req = {
         "skill": self.skill_name,
         "level": self.level
@@ -238,11 +238,54 @@ walker get_skill_graph {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can for_user with root entry;
+    can entry with root entry;
 }
 
-impl get_skill_graph.for_user {
-    let skills = [];
+impl get_skill_graph.entry {
+    let skills = [
+            {
+                "name": "Python",
+                "category": "AI/ML",
+                "difficulty": 3,
+                "market_demand": 0.9
+            },
+            {
+                "name": "TensorFlow",
+                "category": "AI/ML",
+                "difficulty": 7,
+                "market_demand": 0.8
+            },
+            {
+                "name": "SQL",
+                "category": "Data",
+                "difficulty": 4,
+                "market_demand": 0.7
+            },
+            {
+                "name": "JavaScript",
+                "category": "Web",
+                "difficulty": 4,
+                "market_demand": 0.85
+            },
+            {
+                "name": "TypeScript",
+                "category": "Web",
+                "difficulty": 5,
+                "market_demand": 0.8
+            },
+            {
+                "name": "Go",
+                "category": "Backend",
+                "difficulty": 6,
+                "market_demand": 0.75
+            },
+            {
+                "name": "Rust",
+                "category": "Systems",
+                "difficulty": 8,
+                "market_demand": 0.7
+            }
+        ];
     report skills;
 }
 
@@ -251,11 +294,45 @@ walker career_readiness_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can score with root entry;
+    can entry with root entry;
 }
 
-impl career_readiness_agent.score {
-    let score = 0.5;
+impl career_readiness_agent.entry {
+    let user_skills = ["Python", "SQL"];
+    let required = [];
+
+    if self.target_career_title == "AI Engineer" {
+        required = ["Python", "TensorFlow", "SQL"];
+    } elif self.target_career_title == "Data Engineer" {
+        required = ["Python", "SQL"];
+    } elif self.target_career_title == "Web Developer" {
+        required = ["JavaScript", "TypeScript", "SQL"];
+    } else {
+        required = ["Python"];
+    }
+
+    let total = 0;
+    let matched = 0;
+
+    for r in required {
+        total += 1;
+        let has_it = false;
+        for u in user_skills {
+            if u == r {
+                has_it = true;
+                break;
+            }
+        }
+        if has_it {
+            matched += 1;
+        }
+    }
+
+    if total == 0 {
+        report 0.0;
+    }
+
+    let score = float(matched) / float(total);
     report score;
 }
 
@@ -264,11 +341,31 @@ walker learning_path_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can plan with root entry;
+    can entry with root entry;
 }
 
-impl learning_path_agent.plan {
+impl learning_path_agent.entry {
     let ordered = [];
+
+    if self.target_career_title == "AI Engineer" {
+        ordered = [
+            "Python Foundations",
+            "Intro to ML with TensorFlow"
+        ];
+    } elif self.target_career_title == "Data Engineer" {
+        ordered = [
+            "Python Foundations",
+            "SQL for Analytics"
+        ];
+    } elif self.target_career_title == "Web Developer" {
+        ordered = [
+            "Modern JavaScript",
+            "Frontend Frameworks"
+        ];
+    } else {
+        ordered = ["Python Foundations"];
+    }
+
     report ordered;
 }
 
@@ -276,10 +373,10 @@ walker market_intelligence_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can update with root entry;
+    can entry with root entry;
 }
 
-impl market_intelligence_agent.update {
+impl market_intelligence_agent.entry {
     report "updated";
 }
 
@@ -287,11 +384,22 @@ walker mentor_match_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can match with root entry;
+    can entry with root entry;
 }
 
-impl mentor_match_agent.match {
-    let results = [];
+impl mentor_match_agent.entry {
+    let results = [
+        {
+            "mentor_name": "Anna Mentor",
+            "score": 0.9,
+            "overlap": 2
+        },
+        {
+            "mentor_name": "Bob Guide",
+            "score": 0.7,
+            "overlap": 1
+        }
+    ];
     report results;
 }
 
