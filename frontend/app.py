@@ -27,6 +27,7 @@ def init_page():
             background: linear-gradient(90deg, #0f172a, #1e293b);
             color: #f9fafb;
             margin-bottom: 1rem;
+            animation: sfFadeUp 0.6s ease-out;
         }
         .sf-title {
             font-size: 1.6rem;
@@ -45,6 +46,23 @@ def init_page():
         .sf-muted {
             font-size: 0.9rem;
             opacity: 0.8;
+        }
+        .sf-card {
+            padding: 0.9rem 1.0rem;
+            border-radius: 0.75rem;
+            background: #020617;
+            border: 1px solid #1f2937;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.45);
+            transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+        }
+        .sf-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 40px rgba(15,23,42,0.7);
+            border-color: #22c55e;
+        }
+        @keyframes sfFadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         </style>
         """,
@@ -146,6 +164,60 @@ def page_dashboard():
         st.write(
             "See which mentors best match your path and what skills the "
             "market is demanding right now."
+        )
+
+    st.markdown("### Meet your AI co-pilots")
+    a1, a2 = st.columns(2)
+    with a1:
+        st.markdown(
+            """
+            <div class="sf-card">
+                <h4>Skill Analyzer Agent</h4>
+                <p class="sf-muted">
+                Parses your profile, maps out your current stack, and quantifies
+                how close you are to roles like <b>AI Engineer</b>, <b>Data Engineer</b>,
+                or <b>Web Developer</b>.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """
+            <div class="sf-card" style="margin-top:0.8rem;">
+                <h4>Content Curator Agent</h4>
+                <p class="sf-muted">
+                Generates tailored learning modules and coding challenges at the
+                right difficulty using LLMs, so you always practice on relevant tasks.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with a2:
+        st.markdown(
+            """
+            <div class="sf-card">
+                <h4>Progress Mentor Agent</h4>
+                <p class="sf-muted">
+                Watches your learning velocity, highlights stuck points, and
+                nudges you with encouragement and alternative paths when needed.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """
+            <div class="sf-card" style="margin-top:0.8rem;">
+                <h4>Market Intelligence & Mentors</h4>
+                <p class="sf-muted">
+                Surfaces in-demand skills from the market and connects you with
+                mentors whose expertise overlaps your current learning journey.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
 

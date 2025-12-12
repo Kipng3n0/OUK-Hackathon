@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillForge AI - Smart Career Path Navigator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header / Navigation -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>SkillForge AI</h1>
+                    <p class="tagline">Smart Career Path Navigator</p>
+                </div>
+                <nav class="nav-menu">
+                    <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+                    <button class="nav-btn" data-page="skills">Skill Graph</button>
+                    <button class="nav-btn" data-page="learning">Learning Path</button>
+                    <button class="nav-btn" data-page="jobs">Job Market</button>
+                    <button class="nav-btn" data-page="mentors">Mentors</button>
+                    <button class="nav-btn" data-page="profile">Profile</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Notifications -->
+        <div id="notifications" class="notifications-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <section id="dashboard" class="page active">
+                <div class="page-header">
+                    <h2>Career Dashboard</h2>
+                    <p>Your personalized career development hub</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Career Selection Card -->
+                    <div class="card career-selector">
+                        <h3>Select Target Career</h3>
+                        <div class="form-group">
+                            <select id="careerSelect" class="form-control">
+                                <option value="">-- Choose a career --</option>
+                                <option value="AI Engineer">AI Engineer</option>
+                                <option value="Data Engineer">Data Engineer</option>
+                                <option value="Web Developer">Web Developer</option>
+                                <option value="Cloud Architect">Cloud Architect</option>
+                                <option value="DevOps Engineer">DevOps Engineer</option>
+                                <option value="Machine Learning">Machine Learning</option>
+                                <option value="Custom">Custom Role</option>
+                            </select>
+                        </div>
+                        <input type="text" id="customCareer" class="form-control" placeholder="Enter custom career title" style="display:none;">
+                        <button class="btn btn-primary" id="analyzeBtn">Analyze Readiness</button>
+                    </div>
+
+                    <!-- Readiness Score Card -->
+                    <div class="card readiness-card">
+                        <h3>Career Readiness</h3>
+                        <div class="readiness-score">
+                            <div class="score-circle">
+                                <span id="readinessPercent">--</span>%
+                            </div>
+                            <div class="score-details">
+                                <p id="readinessText">Select a career to analyze</p>
+                                <div class="progress-bar">
+                                    <div id="readinessBar" class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Overview Card -->
+                    <div class="card skills-overview">
+                        <h3>Your Skills</h3>
+                        <div id="skillsList" class="skills-list">
+                            <p class="placeholder">Load your skill graph to see details</p>
+                        </div>
+                        <button class="btn btn-secondary" id="loadSkillsBtn">Load Skills</button>
+                    </div>
+
+                    <!-- Learning Path Card -->
+                    <div class="card learning-path">
+                        <h3>Recommended Learning Path</h3>
+                        <div id="pathList" class="path-list">
+                            <p class="placeholder">Select a career to see recommendations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Insights Section -->
+                <div class="section">
+                    <h3>Market Insights</h3>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <h4>In-Demand Skills</h4>
+                            <div id="demandSkills" class="skill-tags">
+                                <span class="tag">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <h4>Emerging Trends</h4>
+                            <div id="trends" class="trends-list">
+                                <p>Market data loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Skills Page -->
+            <section id="skills" class="page">
+                <div class="page-header">
+                    <h2>Skill Graph Visualization</h2>
+                    <p>Map your skills and identify gaps</p>
+                </div>
+
+                <div class="skills-container">
+                    <div class="card">
+                        <h3>Your Skill Network</h3>
+                        <div id="skillsGraph" class="graph-container">
+                            <canvas id="skillsCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Skill Details</h3>
+                        <div id="skillsTable" class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Skill</th>
+                                        <th>Category</th>
+                                        <th>Difficulty</th>
+                                        <th>Market Demand</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="skillsTableBody">
+                                    <tr><td colspan="4" class="placeholder">Loading skills...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Learning Path Page -->
+            <section id="learning" class="page">
+                <div class="page-header">
+                    <h2>Learning Timeline</h2>
+                    <p>Your personalized learning roadmap</p>
+                </div>
+
+                <div class="timeline-container">
+                    <div id="timeline" class="timeline">
+                        <p class="placeholder">Select a career on the Dashboard to generate your learning path</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Recommended Courses</h3>
+                    <div id="coursesList" class="courses-grid">
+                        <p class="placeholder">Courses will appear here</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Job Market Page -->
+            <section id="jobs" class="page">
+                <div class="page-header">
+                    <h2>Job Market Analysis</h2>
+                    <p>Real-time job postings and market trends</p>
+                </div>
+
+                <div class="jobs-container">
+                    <div class="card">
+                        <h3>Matching Job Postings</h3>
+                        <div id="jobsList" class="jobs-list">
+                            <p class="placeholder">Select a career to see matching jobs</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Market Demand by Skill</h3>
+                        <div id="demandChart" class="chart-container">
+                            <canvas id="demandCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mentors Page -->
+            <section id="mentors" class="page">
+                <div class="page-header">
+                    <h2>Find Your Mentors</h2>
+                    <p>Connect with experienced professionals in your field</p>
+                </div>
+
+                <div class="mentors-container">
+                    <div class="card">
+                        <h3>Recommended Mentors</h3>
+                        <div id="mentorsList" class="mentors-grid">
+                            <p class="placeholder">Select a career on the Dashboard to find matching mentors</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Mentor Matching Algorithm</h3>
+                        <p>Our AI analyzes your skills, learning goals, and preferences to match you with mentors who:</p>
+                        <ul class="feature-list">
+                            <li>Have expertise in your target skills</li>
+                            <li>Are available for regular mentoring sessions</li>
+                            <li>Have proven track records (high ratings)</li>
+                            <li>Share similar learning philosophies</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Page -->
+            <section id="profile" class="page">
+                <div class="page-header">
+                    <h2>Your Profile</h2>
+                    <p>Update your information and track progress</p>
+                </div>
+
+                <div class="profile-container">
+                    <div class="card">
+                        <h3>Profile Information</h3>
+                        <form id="profileForm" class="form">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="userName" class="form-control" placeholder="Your name">
+                            </div>
+                            <div class="form-group">
+                                <label>Learning Style</label>
+                                <select id="learningStyle" class="form-control">
+                                    <option value="visual">Visual</option>
+                                    <option value="auditory">Auditory</option>
+                                    <option value="kinesthetic">Kinesthetic</option>
+                                    <option value="balanced">Balanced</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Target Career</label>
+                                <input type="text" id="targetCareer" class="form-control" placeholder="e.g., AI Engineer">
+                            </div>
+                            <div class="form-group">
+                                <label>Resume / Skills Summary</label>
+                                <div class="resume-upload-section">
+                                    <div class="upload-options">
+                                        <button type="button" class="btn btn-secondary" id="uploadResumeBtn">Upload Resume File</button>
+                                        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.txt" style="display:none;">
+                                        <span class="upload-info" id="uploadInfo">Supported: PDF, DOC, DOCX, TXT</span>
+                                    </div>
+                                    <p class="or-divider">OR</p>
+                                    <textarea id="resumeText" class="form-control" placeholder="Paste your resume or describe your skills" rows="6"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3>Learning Progress</h3>
+                        <div id="progressList" class="progress-list">
+                            <p class="placeholder">No progress recorded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 SkillForge AI. Powered by Jac and byLLM.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

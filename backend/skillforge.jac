@@ -35,6 +35,29 @@ node Mentor {
     has rating: float;       # 0.0–5.0
 }
 
+node Course {
+    has title: str;
+    has description: str;
+    has duration_hours: int;
+    has difficulty_level: str;
+    has provider: str;
+}
+
+node Certification {
+    has name: str;
+    has issuer: str;
+    has validity_years: int;
+    has market_value: float;
+}
+
+node JobPosting {
+    has title: str;
+    has company: str;
+    has salary_range: str;
+    has location: str;
+    has posted_date: str;
+}
+
 edge HasSkill {
     has proficiency: int;    # 0–100
 }
@@ -61,6 +84,22 @@ edge InterestedIn {
 
 edge ExpertIn {
     has expertise_level: int;  # 1–10
+}
+
+edge Teaches {
+    has effectiveness: float;  # 0.0–1.0
+}
+
+edge CertifiesSkill {
+    has weight: float;  # 0.0–1.0
+}
+
+edge RequiresSkill {
+    has criticality: int;  # 1–10
+}
+
+edge LeadsTo {
+    has progression: float;  # 0.0–1.0
 }
 
 def extract_skills_from_resume(text: str) -> list by llm();
@@ -179,13 +218,10 @@ walker skill_analyzer_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl skill_analyzer_agent.entry {
-    let extracted = extract_skills_from_resume(self.resume_text);
-    let summary = create_progress_summary(extracted);
-    report summary;
+    can enter with root entry {
+        let extracted = extract_skills_from_resume(self.resume_text);
+        report extracted;
+    }
 }
 
 walker content_curator_agent {
@@ -194,25 +230,21 @@ walker content_curator_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl content_curator_agent.entry {
-    let challenge = generate_coding_challenge(self.skill_name, self.level);
-    report challenge;
+    can enter with root entry {
+        let challenge = generate_coding_challenge(self.skill_name, self.level);
+        report challenge;
+    }
 }
 
 walker progress_mentor_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl progress_mentor_agent.entry {
-    let names = ["Python", "TensorFlow", "SQL"];
-    let text = create_progress_summary(names);
-    report text;
+    can enter with root entry {
+        let names = ["Python", "TensorFlow", "SQL"];
+        let text = create_progress_summary(names);
+        report text;
+    }
 }
 
 walker evaluation_agent {
@@ -222,27 +254,22 @@ walker evaluation_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl evaluation_agent.entry {
-    let req = {
-        "skill": self.skill_name,
-        "level": self.level
-    };
-    let result = evaluate_code_submission(self.code, req);
-    report result;
+    can enter with root entry {
+        let req = {
+            "skill": self.skill_name,
+            "level": self.level
+        };
+        let result = evaluate_code_submission(self.code, req);
+        report result;
+    }
 }
 
 walker get_skill_graph {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl get_skill_graph.entry {
-    let skills = [
+    can enter with root entry {
+        let skills = [
             {
                 "name": "Python",
                 "category": "AI/ML",
@@ -286,7 +313,8 @@ impl get_skill_graph.entry {
                 "market_demand": 0.7
             }
         ];
-    report skills;
+        report skills;
+    }
 }
 
 walker career_readiness_agent {
@@ -294,46 +322,44 @@ walker career_readiness_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
+    can enter with root entry {
+        let user_skills = ["Python", "SQL"];
+        let required = [];
 
-impl career_readiness_agent.entry {
-    let user_skills = ["Python", "SQL"];
-    let required = [];
+        if self.target_career_title == "AI Engineer" {
+            required = ["Python", "TensorFlow", "SQL"];
+        } elif self.target_career_title == "Data Engineer" {
+            required = ["Python", "SQL"];
+        } elif self.target_career_title == "Web Developer" {
+            required = ["JavaScript", "TypeScript", "SQL"];
+        } else {
+            required = ["Python"];
+        }
 
-    if self.target_career_title == "AI Engineer" {
-        required = ["Python", "TensorFlow", "SQL"];
-    } elif self.target_career_title == "Data Engineer" {
-        required = ["Python", "SQL"];
-    } elif self.target_career_title == "Web Developer" {
-        required = ["JavaScript", "TypeScript", "SQL"];
-    } else {
-        required = ["Python"];
-    }
+        let total = 0;
+        let matched = 0;
 
-    let total = 0;
-    let matched = 0;
-
-    for r in required {
-        total += 1;
-        let has_it = false;
-        for u in user_skills {
-            if u == r {
-                has_it = true;
-                break;
+        for r in required {
+            total += 1;
+            let has_it = false;
+            for u in user_skills {
+                if u == r {
+                    has_it = true;
+                    break;
+                }
+            }
+            if has_it {
+                matched += 1;
             }
         }
-        if has_it {
-            matched += 1;
+
+        if total == 0 {
+            report 0.0;
         }
-    }
 
-    if total == 0 {
-        report 0.0;
+        let score = float(matched) / float(total);
+        report score;
     }
-
-    let score = float(matched) / float(total);
-    report score;
 }
 
 walker learning_path_agent {
@@ -341,66 +367,60 @@ walker learning_path_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
+    can enter with root entry {
+        let ordered = [];
 
-impl learning_path_agent.entry {
-    let ordered = [];
+        if self.target_career_title == "AI Engineer" {
+            ordered = [
+                "Python Foundations",
+                "Intro to ML with TensorFlow"
+            ];
+        } elif self.target_career_title == "Data Engineer" {
+            ordered = [
+                "Python Foundations",
+                "SQL for Analytics"
+            ];
+        } elif self.target_career_title == "Web Developer" {
+            ordered = [
+                "Modern JavaScript",
+                "Frontend Frameworks"
+            ];
+        } else {
+            ordered = ["Python Foundations"];
+        }
 
-    if self.target_career_title == "AI Engineer" {
-        ordered = [
-            "Python Foundations",
-            "Intro to ML with TensorFlow"
-        ];
-    } elif self.target_career_title == "Data Engineer" {
-        ordered = [
-            "Python Foundations",
-            "SQL for Analytics"
-        ];
-    } elif self.target_career_title == "Web Developer" {
-        ordered = [
-            "Modern JavaScript",
-            "Frontend Frameworks"
-        ];
-    } else {
-        ordered = ["Python Foundations"];
+        report ordered;
     }
-
-    report ordered;
 }
 
 walker market_intelligence_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl market_intelligence_agent.entry {
-    report "updated";
+    can enter with root entry {
+        report "updated";
+    }
 }
 
 walker mentor_match_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can entry with root entry;
-}
-
-impl mentor_match_agent.entry {
-    let results = [
-        {
-            "mentor_name": "Anna Mentor",
-            "score": 0.9,
-            "overlap": 2
-        },
-        {
-            "mentor_name": "Bob Guide",
-            "score": 0.7,
-            "overlap": 1
-        }
-    ];
-    report results;
+    can enter with root entry {
+        let results = [
+            {
+                "mentor_name": "Anna Mentor",
+                "score": 0.9,
+                "overlap": 2
+            },
+            {
+                "mentor_name": "Bob Guide",
+                "score": 0.7,
+                "overlap": 1
+            }
+        ];
+        report results;
+    }
 }
 
 with entry {
