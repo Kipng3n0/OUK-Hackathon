@@ -218,7 +218,7 @@ walker skill_analyzer_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         let extracted = extract_skills_from_resume(self.resume_text);
         report extracted;
     }
@@ -230,7 +230,7 @@ walker content_curator_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         let challenge = generate_coding_challenge(self.skill_name, self.level);
         report challenge;
     }
@@ -240,7 +240,7 @@ walker progress_mentor_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         let names = ["Python", "TensorFlow", "SQL"];
         let text = create_progress_summary(names);
         report text;
@@ -254,7 +254,7 @@ walker evaluation_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         let req = {
             "skill": self.skill_name,
             "level": self.level
@@ -269,51 +269,15 @@ walker get_skill_graph {
         static has auth: bool = False;
     }
     can enter with root entry {
-        let skills = [
-            {
-                "name": "Python",
-                "category": "AI/ML",
-                "difficulty": 3,
-                "market_demand": 0.9
-            },
-            {
-                "name": "TensorFlow",
-                "category": "AI/ML",
-                "difficulty": 7,
-                "market_demand": 0.8
-            },
-            {
-                "name": "SQL",
-                "category": "Data",
-                "difficulty": 4,
-                "market_demand": 0.7
-            },
-            {
-                "name": "JavaScript",
-                "category": "Web",
-                "difficulty": 4,
-                "market_demand": 0.85
-            },
-            {
-                "name": "TypeScript",
-                "category": "Web",
-                "difficulty": 5,
-                "market_demand": 0.8
-            },
-            {
-                "name": "Go",
-                "category": "Backend",
-                "difficulty": 6,
-                "market_demand": 0.75
-            },
-            {
-                "name": "Rust",
-                "category": "Systems",
-                "difficulty": 8,
-                "market_demand": 0.7
-            }
+        report [
+            {"name": "Python", "category": "AI/ML", "difficulty": 3, "market_demand": 0.9},
+            {"name": "TensorFlow", "category": "AI/ML", "difficulty": 7, "market_demand": 0.8},
+            {"name": "SQL", "category": "Data", "difficulty": 4, "market_demand": 0.7},
+            {"name": "JavaScript", "category": "Web", "difficulty": 4, "market_demand": 0.85},
+            {"name": "TypeScript", "category": "Web", "difficulty": 5, "market_demand": 0.8},
+            {"name": "Go", "category": "Backend", "difficulty": 6, "market_demand": 0.75},
+            {"name": "Rust", "category": "Systems", "difficulty": 8, "market_demand": 0.7}
         ];
-        report skills;
     }
 }
 
@@ -322,7 +286,7 @@ walker career_readiness_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         let user_skills = ["Python", "SQL"];
         let required = [];
 
@@ -367,7 +331,7 @@ walker learning_path_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         let ordered = [];
 
         if self.target_career_title == "AI Engineer" {
@@ -397,7 +361,7 @@ walker market_intelligence_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
+    can run with root entry {
         report "updated";
     }
 }
@@ -407,19 +371,41 @@ walker mentor_match_agent {
         static has auth: bool = False;
     }
     can enter with root entry {
-        let results = [
+        let mentors = [
             {
                 "mentor_name": "Anna Mentor",
+                "expertise": ["Python", "TensorFlow", "Machine Learning"],
                 "score": 0.9,
-                "overlap": 2
+                "overlap": 3,
+                "rating": 4.8,
+                "availability": 85
             },
             {
                 "mentor_name": "Bob Guide",
-                "score": 0.7,
-                "overlap": 1
+                "expertise": ["SQL", "Data Engineering", "Python"],
+                "score": 0.85,
+                "overlap": 2,
+                "rating": 4.6,
+                "availability": 70
+            },
+            {
+                "mentor_name": "Carol Expert",
+                "expertise": ["JavaScript", "React", "Web Development"],
+                "score": 0.75,
+                "overlap": 1,
+                "rating": 4.9,
+                "availability": 90
+            },
+            {
+                "mentor_name": "David Coach",
+                "expertise": ["Cloud Architecture", "AWS", "DevOps"],
+                "score": 0.65,
+                "overlap": 1,
+                "rating": 4.7,
+                "availability": 60
             }
         ];
-        report results;
+        report mentors;
     }
 }
 

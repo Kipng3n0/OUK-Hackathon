@@ -4,12 +4,8 @@ let currentCareer = null;
 let skillsData = [];
 let learningPathData = [];
 let userExtractedSkills = ['Python', 'SQL'];
-let currentUser = {
-    name: 'Demo User',
-    learning_style: 'balanced',
-    target_career: '',
-    skills: ['Python', 'SQL']
-};
+let currentUser = null;
+let isLoggedIn = false;
 
 // Career skill requirements
 const careerRequirements = {
@@ -24,11 +20,166 @@ const careerRequirements = {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    setupNavigation();
-    setupEventListeners();
-    loadInitialData();
-    setupScrollAnimations();
+    checkAuthStatus();
+    setupAuthListeners();
+    if (isLoggedIn) {
+        setupNavigation();
+        setupEventListeners();
+        loadInitialData();
+        setupScrollAnimations();
+    }
 });
+
+// Authentication Functions
+function checkAuthStatus() {
+    const sessionUser = localStorage.getItem('currentUser');
+    if (sessionUser) {
+        currentUser = JSON.parse(sessionUser);
+        isLoggedIn = true;
+        hideAuthModal();
+    } else {
+        isLoggedIn = false;
+        showAuthModal();
+    }
+}
+
+function showAuthModal() {
+    const modal = document.getElementById('authModal');
+    const header = document.getElementById('header');
+    const mainContent = document.getElementById('mainContent');
+    if (modal) modal.classList.add('active');
+    if (header) header.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'none';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideAuthModal() {
+    const modal = document.getElementById('authModal');
+    const header = document.getElementById('header');
+    const mainContent = document.getElementById('mainContent');
+    if (modal) modal.classList.remove('active');
+    if (header) header.style.display = 'block';
+    if (mainContent) mainContent.style.display = 'block';
+    document.body.style.overflow = 'auto';
+}
+
+function setupAuthListeners() {
+    // Screen navigation
+    const switchToSignup = document.getElementById('switchToSignup');
+    const switchToLogin = document.getElementById('switchToLogin');
+    const switchToLoginFromSignup = document.getElementById('switchToLoginFromSignup');
+
+    if (switchToSignup) {
+        switchToSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthScreen('signup');
+        });
+    }
+    if (switchToLogin) {
+        switchToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthScreen('login');
+        });
+    }
+    if (switchToLoginFromSignup) {
+        switchToLoginFromSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthScreen('login');
+        });
+    }
+
+    // Login form
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                isLoggedIn = true;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showNotification(`✓ Welcome back, ${user.name}!`, 'success');
+                hideAuthModal();
+                location.reload();
+            } else {
+                showNotification('Invalid email or password', 'error');
+            }
+        });
+    }
+
+    // Signup form
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const firstName = document.getElementById('signupFirstName').value;
+            const lastName = document.getElementById('signupLastName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            if (!agreeTerms) {
+                showNotification('Please agree to the Terms & Conditions', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (users.find(u => u.email === email)) {
+                showNotification('Email already registered', 'error');
+                return;
+            }
+            
+            const fullName = `${firstName} ${lastName}`;
+            const newUser = {
+                id: Date.now(),
+                name: fullName,
+                email: email,
+                password: password,
+                learning_style: 'balanced',
+                target_career: '',
+                skills: [],
+                connectedMentors: []
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            currentUser = newUser;
+            isLoggedIn = true;
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            showNotification(`✓ Account created! Welcome, ${fullName}!`, 'success');
+            hideAuthModal();
+            location.reload();
+        });
+    }
+
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            isLoggedIn = false;
+            currentUser = null;
+            showNotification('✓ Logged out successfully', 'success');
+            location.reload();
+        });
+    }
+}
+
+// Show specific auth screen
+function showAuthScreen(screenName) {
+    document.querySelectorAll('.auth-screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    const screen = document.getElementById(screenName + 'Screen') || document.getElementById('authChoice');
+    if (screen) {
+        screen.classList.add('active');
+    }
+}
 
 // Setup Scroll Animations
 function setupScrollAnimations() {
@@ -113,6 +264,8 @@ function showPage(pageName) {
 
 // Event Listeners Setup
 function setupEventListeners() {
+    setupAuthListeners();
+    
     // Career selection
     const careerSelect = document.getElementById('careerSelect');
     const customCareer = document.getElementById('customCareer');
@@ -239,16 +392,46 @@ async function loadInitialData() {
         }
         
         // Load skills on dashboard
-        const skills = await callWalker('get_skill_graph', {});
-        if (skills && Array.isArray(skills)) {
+        const skillsResponse = await callWalker('get_skill_graph', {});
+        let skills = skillsResponse;
+        
+        // Handle both direct array and wrapped response
+        if (skillsResponse && Array.isArray(skillsResponse)) {
+            skills = skillsResponse;
+        } else if (skillsResponse && skillsResponse[0] && Array.isArray(skillsResponse[0])) {
+            skills = skillsResponse[0];
+        }
+        
+        if (skills && Array.isArray(skills) && skills.length > 0) {
             skillsData = skills;
             displaySkillsOverview(skills);
             displayMarketInsights(skills);
+        } else {
+            console.log('No skills data received from backend');
         }
     } catch (error) {
         console.error('Error loading initial data:', error);
     }
 }
+
+// Fallback data for when backend walkers don't return data
+const fallbackData = {
+    get_skill_graph: [
+        {"name": "Python", "category": "AI/ML", "difficulty": 3, "market_demand": 0.9},
+        {"name": "TensorFlow", "category": "AI/ML", "difficulty": 7, "market_demand": 0.8},
+        {"name": "SQL", "category": "Data", "difficulty": 4, "market_demand": 0.7},
+        {"name": "JavaScript", "category": "Web", "difficulty": 4, "market_demand": 0.85},
+        {"name": "TypeScript", "category": "Web", "difficulty": 5, "market_demand": 0.8},
+        {"name": "Go", "category": "Backend", "difficulty": 6, "market_demand": 0.75},
+        {"name": "Rust", "category": "Systems", "difficulty": 8, "market_demand": 0.7}
+    ],
+    mentor_match_agent: [
+        {"mentor_name": "Anna Mentor", "expertise": ["Python", "TensorFlow", "Machine Learning"], "score": 0.9, "overlap": 3, "rating": 4.8, "availability": 85},
+        {"mentor_name": "Bob Guide", "expertise": ["SQL", "Data Engineering", "Python"], "score": 0.85, "overlap": 2, "rating": 4.6, "availability": 70},
+        {"mentor_name": "Carol Expert", "expertise": ["JavaScript", "React", "Web Development"], "score": 0.75, "overlap": 1, "rating": 4.9, "availability": 90},
+        {"mentor_name": "David Coach", "expertise": ["Cloud Architecture", "AWS", "DevOps"], "score": 0.65, "overlap": 1, "rating": 4.7, "availability": 60}
+    ]
+};
 
 // Call Jac Walker
 async function callWalker(walkerName, payload = {}) {
@@ -273,9 +456,20 @@ async function callWalker(walkerName, payload = {}) {
             return data.reports[0];
         }
         
+        // If backend returns empty reports, use fallback data
+        if (fallbackData[walkerName]) {
+            console.log(`Backend returned empty reports for ${walkerName}, using fallback data`);
+            return fallbackData[walkerName];
+        }
+        
         return data;
     } catch (error) {
         console.error(`Error calling walker ${walkerName}:`, error);
+        // Use fallback data on error
+        if (fallbackData[walkerName]) {
+            console.log(`Error calling ${walkerName}, using fallback data`);
+            return fallbackData[walkerName];
+        }
         showNotification(`Error calling ${walkerName}: ${error.message}`, 'error');
         return null;
     }
@@ -479,10 +673,17 @@ async function loadSkillGraph() {
         
         let skills = skillsData;
         if (!skills || skills.length === 0) {
-            skills = await callWalker('get_skill_graph', {});
+            const skillsResponse = await callWalker('get_skill_graph', {});
+            
+            // Handle both direct array and wrapped response
+            if (skillsResponse && Array.isArray(skillsResponse)) {
+                skills = skillsResponse;
+            } else if (skillsResponse && skillsResponse[0] && Array.isArray(skillsResponse[0])) {
+                skills = skillsResponse[0];
+            }
         }
         
-        if (!skills || !Array.isArray(skills)) {
+        if (!skills || !Array.isArray(skills) || skills.length === 0) {
             document.getElementById('skillsTableBody').innerHTML = '<tr><td colspan="4" class="placeholder">No skills data available</td></tr>';
             showNotification('No skills data available', 'error');
             return;
@@ -506,6 +707,7 @@ async function loadSkillGraph() {
         
         showNotification('✓ Skills loaded successfully', 'success');
     } catch (error) {
+        console.error('Error loading skills:', error);
         showNotification('Error loading skills', 'error');
     }
 }
@@ -661,10 +863,17 @@ async function loadJobMarket() {
         
         let skills = skillsData;
         if (!skills || skills.length === 0) {
-            skills = await callWalker('get_skill_graph', {});
+            const skillsResponse = await callWalker('get_skill_graph', {});
+            
+            // Handle both direct array and wrapped response
+            if (skillsResponse && Array.isArray(skillsResponse)) {
+                skills = skillsResponse;
+            } else if (skillsResponse && skillsResponse[0] && Array.isArray(skillsResponse[0])) {
+                skills = skillsResponse[0];
+            }
         }
         
-        if (!skills) {
+        if (!skills || !Array.isArray(skills) || skills.length === 0) {
             showNotification('Error loading job market data', 'error');
             return;
         }
@@ -677,6 +886,7 @@ async function loadJobMarket() {
         
         showNotification('✓ Job market data loaded', 'success');
     } catch (error) {
+        console.error('Error loading job market:', error);
         showNotification('Error loading job market', 'error');
     }
 }
@@ -806,25 +1016,30 @@ function drawDemandChart(skills) {
 
 // Load Mentors
 async function loadMentors() {
-    if (!currentCareer) {
-        document.getElementById('mentorsList').innerHTML = '<p class="placeholder">Select a career on the Dashboard to find matching mentors</p>';
-        return;
-    }
-    
     try {
         showLoading('mentorsList');
         
-        const mentors = await callWalker('mentor_match_agent', {});
+        const mentorsResponse = await callWalker('mentor_match_agent', {});
+        let mentors = mentorsResponse;
         
-        if (!mentors || !Array.isArray(mentors)) {
+        // Handle both direct array and wrapped response
+        if (mentorsResponse && Array.isArray(mentorsResponse)) {
+            mentors = mentorsResponse;
+        } else if (mentorsResponse && mentorsResponse[0] && Array.isArray(mentorsResponse[0])) {
+            mentors = mentorsResponse[0];
+        }
+        
+        if (!mentors || !Array.isArray(mentors) || mentors.length === 0) {
             document.getElementById('mentorsList').innerHTML = '<p class="placeholder">No mentors available</p>';
             showNotification('No mentors available', 'error');
             return;
         }
         
         displayMentors(mentors);
+        updateConnectedMentorButtons();
         showNotification('✓ Mentors loaded', 'success');
     } catch (error) {
+        console.error('Error loading mentors:', error);
         showNotification('Error loading mentors', 'error');
     }
 }
@@ -838,10 +1053,11 @@ function displayMentors(mentors) {
         return;
     }
     
-    mentorsList.innerHTML = mentors.map(mentor => {
+    mentorsList.innerHTML = mentors.map((mentor, index) => {
         const rating = mentor.rating || 0;
         const stars = '⭐'.repeat(Math.round(rating));
         const availability = mentor.availability || 0;
+        const expertise = (mentor.expertise || []).join(', ');
         
         return `
             <div class="mentor-card">
@@ -853,13 +1069,53 @@ function displayMentors(mentors) {
                     <span>${rating.toFixed(1)}/5.0</span>
                 </div>
                 <div class="mentor-skills">
-                    <span class="mentor-skill">Skill Overlap: ${mentor.overlap || 0}</span>
+                    <span class="mentor-skill">Expertise: ${expertise}</span>
+                    <span class="mentor-skill">Overlap: ${mentor.overlap || 0} skills</span>
                 </div>
                 <p class="mentor-availability">Available: ${availability}% of time</p>
-                <button class="btn btn-primary">Connect</button>
+                <button class="btn btn-primary" onclick="connectWithMentor('${mentor.mentor_name}', ${index})">Connect</button>
             </div>
         `;
     }).join('');
+}
+
+// Connect with Mentor
+function connectWithMentor(mentorName, mentorIndex) {
+    const connectedMentors = JSON.parse(localStorage.getItem('connectedMentors') || '[]');
+    
+    if (!connectedMentors.includes(mentorName)) {
+        connectedMentors.push(mentorName);
+        localStorage.setItem('connectedMentors', JSON.stringify(connectedMentors));
+        showNotification(`✓ Connected with ${mentorName}!`, 'success');
+    } else {
+        showNotification(`Already connected with ${mentorName}`, 'info');
+    }
+    
+    // Update button state
+    const buttons = document.querySelectorAll('.mentor-card button');
+    if (buttons[mentorIndex]) {
+        buttons[mentorIndex].textContent = 'Connected ✓';
+        buttons[mentorIndex].disabled = true;
+        buttons[mentorIndex].style.opacity = '0.6';
+    }
+}
+
+// Update Connected Mentor Buttons
+function updateConnectedMentorButtons() {
+    const connectedMentors = JSON.parse(localStorage.getItem('connectedMentors') || '[]');
+    const buttons = document.querySelectorAll('.mentor-card button');
+    const mentorCards = document.querySelectorAll('.mentor-card h4');
+    
+    buttons.forEach((button, index) => {
+        if (mentorCards[index]) {
+            const mentorName = mentorCards[index].textContent;
+            if (connectedMentors.includes(mentorName)) {
+                button.textContent = 'Connected ✓';
+                button.disabled = true;
+                button.style.opacity = '0.6';
+            }
+        }
+    });
 }
 
 // Load Profile
@@ -914,12 +1170,10 @@ async function updateProfile() {
         return;
     }
     
-    currentUser = {
-        name,
-        learning_style: style,
-        target_career: career,
-        skills: userExtractedSkills
-    };
+    currentUser.name = name;
+    currentUser.learning_style = style;
+    currentUser.target_career = career;
+    currentUser.skills = userExtractedSkills;
     
     try {
         if (resume) {
@@ -954,4 +1208,13 @@ async function updateProfile() {
     } catch (error) {
         showNotification('Profile updated (skill analysis skipped)', 'success');
     }
+    
+    // Save updated user profile to localStorage
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const userIndex = users.findIndex(u => u.id === currentUser.id);
+    if (userIndex >= 0) {
+        users[userIndex] = currentUser;
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
 }

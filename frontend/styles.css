@@ -1053,4 +1053,258 @@ body {
     .page-header h2 {
         font-size: 1.5rem;
     }
+
+    /* Auth responsive */
+    .auth-container-wrapper {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+    }
+
+    .auth-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-form-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-brand {
+        font-size: 1.8rem;
+    }
+
+    .auth-features {
+        gap: 1rem;
+    }
+
+    .feature-icon {
+        font-size: 1.5rem;
+    }
+
+    .feature-item p {
+        font-size: 0.85rem;
+    }
+}
+
+/* Authentication Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex !important;
+}
+
+.auth-container-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: 2px solid var(--accent-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(255, 165, 0, 0.3);
+    animation: slideIn 0.3s ease-out;
+    width: 90%;
+    max-width: 900px;
+    height: auto;
+}
+
+.auth-sidebar {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%23FFB347;stop-opacity:1" /><stop offset="50%" style="stop-color:%2387CEEB;stop-opacity:1" /><stop offset="100%" style="stop-color:%23FFD700;stop-opacity:1" /></linearGradient></defs><rect width="1200" height="800" fill="url(%23sky)"/><path d="M 0 600 Q 300 500 600 550 T 1200 600 L 1200 800 L 0 800 Z" fill="%23228B22" opacity="0.6"/><path d="M 100 700 Q 200 650 300 700 L 300 800 L 100 800 Z" fill="%23000000" opacity="0.7"/><path d="M 900 700 Q 1000 650 1100 700 L 1100 800 L 900 800 Z" fill="%23000000" opacity="0.7"/><line x1="600" y1="300" x2="600" y2="650" stroke="%23FFFFFF" stroke-width="40" opacity="0.4"/></svg>');
+    background-size: cover;
+    background-position: center;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid var(--border-color);
+}
+
+.auth-sidebar-content {
+    text-align: center;
+}
+
+.auth-brand {
+    font-size: 2.2rem;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.auth-tagline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+.auth-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.feature-item {
+    text-align: center;
+}
+
+.feature-item p {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.auth-form-container {
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.auth-screen {
+    display: none !important;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.auth-screen.active {
+    display: block !important;
+}
+
+/* Auth Form Screens */
+.auth-screen h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent-color);
+    text-align: center;
+}
+
+.auth-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.auth-form {
+    margin-top: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.auth-form .form-control {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.auth-form .form-control::placeholder {
+    color: var(--text-secondary);
+}
+
+.auth-form .form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.2);
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    padding: 0;
+    text-decoration: underline;
+}
+
+.link-btn:hover {
+    color: var(--accent-light);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--accent-color);
+}
+
+.checkbox-group label {
+    margin: 0;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.checkbox-group label a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.checkbox-group label a:hover {
+    text-decoration: underline;
 }

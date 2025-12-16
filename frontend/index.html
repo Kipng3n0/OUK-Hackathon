@@ -8,8 +8,81 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- Auth Modal -->
+        <div id="authModal" class="modal active">
+            <div class="auth-container-wrapper">
+                <!-- Left Side - Branding & Info -->
+                <div class="auth-sidebar">
+                    <div class="auth-sidebar-content">
+                        <h1 class="auth-brand">SkillForge AI</h1>
+                        <p class="auth-tagline">Smart Career Path Navigator</p>
+                        <div class="auth-features">
+                            <div class="feature-item">
+                                <p>Personalized Learning Paths</p>
+                            </div>
+                            <div class="feature-item">
+                                <p>Career Readiness Analysis</p>
+                            </div>
+                            <div class="feature-item">
+                                <p>Expert Mentor Connections</p>
+                            </div>
+                            <div class="feature-item">
+                                <p>Market Intelligence & Insights</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Form -->
+                <div class="auth-form-container">
+                    <!-- Login Form -->
+                    <div id="loginScreen" class="auth-screen">
+                        <h2>Welcome Back</h2>
+                        <p class="auth-subtitle">Login to your account</p>
+                        <form id="loginForm" class="auth-form">
+                            <div class="form-group">
+                                <input type="email" id="loginEmail" class="form-control" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Login</button>
+                        </form>
+                        <p class="auth-footer">Don't have an account? <button type="button" class="link-btn" id="switchToSignup">Sign up</button></p>
+                    </div>
+
+                    <!-- Signup Form -->
+                    <div id="signupScreen" class="auth-screen active">
+                        <h2>Create an account</h2>
+                        <p class="auth-subtitle">Already have an account? <button type="button" class="link-btn" id="switchToLoginFromSignup">Log in</button></p>
+                        <form id="signupForm" class="auth-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="signupFirstName" class="form-control" placeholder="First name" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="signupLastName" class="form-control" placeholder="Last name" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="signupEmail" class="form-control" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="signupPassword" class="form-control" placeholder="Enter your password" required>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="agreeTerms" required>
+                                <label for="agreeTerms">I agree to the Terms & Conditions</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Create account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Header / Navigation -->
-        <header class="header">
+        <header class="header" id="header" style="display: none;">
             <div class="header-content">
                 <div class="logo">
                     <h1>SkillForge AI</h1>
@@ -22,6 +95,7 @@
                     <button class="nav-btn" data-page="jobs">Job Market</button>
                     <button class="nav-btn" data-page="mentors">Mentors</button>
                     <button class="nav-btn" data-page="profile">Profile</button>
+                    <button class="nav-btn" id="logoutBtn">Logout</button>
                 </nav>
             </div>
         </header>
@@ -30,7 +104,7 @@
         <div id="notifications" class="notifications-container"></div>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="mainContent" style="display: none;">
             <!-- Dashboard Page -->
             <section id="dashboard" class="page active">
                 <div class="page-header">
