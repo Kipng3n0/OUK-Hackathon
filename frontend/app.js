@@ -85,10 +85,15 @@ function setupAuthListeners() {
         });
     }
     if (switchToLoginFromSignup) {
+        console.log('Login link found:', switchToLoginFromSignup);
         switchToLoginFromSignup.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            console.log('Login link clicked!');
             showAuthScreen('login');
         });
+    } else {
+        console.error('switchToLoginFromSignup button not found!');
     }
     if (forgotPasswordBtn) {
         forgotPasswordBtn.addEventListener('click', (e) => {
@@ -252,20 +257,28 @@ function showAuthScreen(screenName) {
 function setupScrollAnimations() {
     const observerOptions = {
         threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px'
+        rootMargin: '0px 0px -50px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.animation = getAnimationForElement(entry.target);
+                entry.target.classList.add('visible');
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    // Observe all cards and elements
+    // Observe all cards and elements with animation classes
+    document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Also observe cards and other elements
     document.querySelectorAll('.card, .course-card, .job-card, .mentor-card, .timeline-item, .insight-card').forEach(el => {
+        if (!el.classList.contains('fade-in')) {
+            el.classList.add('fade-in');
+        }
         observer.observe(el);
     });
 }
@@ -300,19 +313,37 @@ function setupNavigation() {
 // Show Page
 function showPage(pageName) {
     const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.remove('active'));
     
-    const targetPage = document.getElementById(pageName);
-    if (targetPage) {
-        targetPage.classList.add('active');
+    // Fade out current page
+    pages.forEach(page => {
+        if (page.classList.contains('active')) {
+            page.style.opacity = '0';
+            page.style.transform = 'translateX(-20px)';
+        }
+    });
+    
+    // Wait for fade out, then switch pages
+    setTimeout(() => {
+        pages.forEach(page => page.classList.remove('active'));
         
-        // Scroll to top smoothly
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Re-trigger scroll animations for new page
-        setTimeout(() => {
-            setupScrollAnimations();
-        }, 100);
+        const targetPage = document.getElementById(pageName);
+        if (targetPage) {
+            targetPage.classList.add('active');
+            targetPage.classList.add('page-transition');
+            
+            // Reset opacity and transform
+            targetPage.style.opacity = '1';
+            targetPage.style.transform = 'translateX(0)';
+            
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Re-trigger scroll animations for new page
+            setTimeout(() => {
+                setupScrollAnimations();
+                targetPage.classList.remove('page-transition');
+            }, 100);
+        }
         
         // Load page-specific data
         if (pageName === 'skills') {
@@ -326,7 +357,7 @@ function showPage(pageName) {
         } else if (pageName === 'profile') {
             loadProfile();
         }
-    }
+    }, 200);
 }
 
 // Event Listeners Setup
