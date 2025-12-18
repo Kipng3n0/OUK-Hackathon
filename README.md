@@ -54,6 +54,8 @@ You can extend this base into a fuller SkillForge AI system (e.g., richer analyt
 From the project root:
 
 ```bash
+python notification_server.py
+# another terminal
 jac run backend/skillforge.jac
 ```
 
@@ -81,6 +83,8 @@ In a new terminal (still inside the project root), start the dashboard:
 
 ```bash
 streamlit run frontend/app.py
+### use this instead
+python3 -m http.server 8080
 ```
 
 By default, it expects the Jac server at `http://localhost:8000`. To point to a different URL, set:

@@ -1086,15 +1086,14 @@ async function loadMentors() {
     try {
         showLoading('mentorsList');
         
-        const mentorsResponse = await callWalker('mentor_match_agent', {});
-        let mentors = mentorsResponse;
+        // Call notification server instead of Jac backend
+        const response = await fetch('http://localhost:8001/get-mentors');
         
-        // Handle both direct array and wrapped response
-        if (mentorsResponse && Array.isArray(mentorsResponse)) {
-            mentors = mentorsResponse;
-        } else if (mentorsResponse && mentorsResponse[0] && Array.isArray(mentorsResponse[0])) {
-            mentors = mentorsResponse[0];
+        if (!response.ok) {
+            throw new Error('Failed to fetch mentors');
         }
+        
+        const mentors = await response.json();
         
         if (!mentors || !Array.isArray(mentors) || mentors.length === 0) {
             document.getElementById('mentorsList').innerHTML = '<p class="placeholder">No mentors available</p>';
@@ -1103,6 +1102,7 @@ async function loadMentors() {
         }
         
         availableMentors = mentors;
+        console.log('Loaded mentors:', availableMentors);
         displayMentors(mentors);
         updateConnectedMentorButtons();
         showNotification('✓ Mentors loaded', 'success');
