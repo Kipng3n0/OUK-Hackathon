@@ -46,9 +46,25 @@
                             <div class="form-group">
                                 <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
                             </div>
+                            <div class="forgot-password-link">
+                                <button type="button" class="link-btn" id="forgotPasswordBtn">Forgot password?</button>
+                            </div>
                             <button type="submit" class="btn btn-primary btn-block">Login</button>
                         </form>
                         <p class="auth-footer">Don't have an account? <button type="button" class="link-btn" id="switchToSignup">Sign up</button></p>
+                    </div>
+
+                    <!-- Forgot Password Form -->
+                    <div id="forgotPasswordScreen" class="auth-screen">
+                        <h2>Reset Password</h2>
+                        <p class="auth-subtitle">Enter your email to reset your password</p>
+                        <form id="forgotPasswordForm" class="auth-form">
+                            <div class="form-group">
+                                <input type="email" id="resetEmail" class="form-control" placeholder="Email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Send Reset Link</button>
+                        </form>
+                        <p class="auth-footer">Remember your password? <button type="button" class="link-btn" id="backToLogin">Log in</button></p>
                     </div>
 
                     <!-- Signup Form -->

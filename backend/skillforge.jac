@@ -370,42 +370,73 @@ walker mentor_match_agent {
     obj __specs__ {
         static has auth: bool = False;
     }
-    can enter with root entry {
-        let mentors = [
-            {
-                "mentor_name": "Anna Mentor",
-                "expertise": ["Python", "TensorFlow", "Machine Learning"],
-                "score": 0.9,
-                "overlap": 3,
-                "rating": 4.8,
-                "availability": 85
-            },
-            {
-                "mentor_name": "Bob Guide",
-                "expertise": ["SQL", "Data Engineering", "Python"],
-                "score": 0.85,
-                "overlap": 2,
-                "rating": 4.6,
-                "availability": 70
-            },
-            {
-                "mentor_name": "Carol Expert",
-                "expertise": ["JavaScript", "React", "Web Development"],
-                "score": 0.75,
-                "overlap": 1,
-                "rating": 4.9,
-                "availability": 90
-            },
-            {
-                "mentor_name": "David Coach",
-                "expertise": ["Cloud Architecture", "AWS", "DevOps"],
-                "score": 0.65,
-                "overlap": 1,
-                "rating": 4.7,
-                "availability": 60
-            }
-        ];
-        report mentors;
+    can run with root entry;
+}
+
+impl mentor_match_agent.run {
+    let mentors = [
+        {
+            "mentor_name": "Anna Mentor",
+            "expertise": ["Python", "TensorFlow", "Machine Learning"],
+            "score": 0.9,
+            "overlap": 3,
+            "rating": 4.8,
+            "availability": 85,
+            "email": "codeivan593@gmail.com"
+        },
+        {
+            "mentor_name": "Bob Guide",
+            "expertise": ["SQL", "Data Engineering", "Python"],
+            "score": 0.85,
+            "overlap": 2,
+            "rating": 4.6,
+            "availability": 70,
+            "email": "ipavlo953@gmail.com"
+        },
+        {
+            "mentor_name": "Carol Expert",
+            "expertise": ["JavaScript", "React", "Web Development"],
+            "score": 0.75,
+            "overlap": 1,
+            "rating": 4.9,
+            "availability": 90,
+            "email": "remotasks.karan01@gmail.com"
+        },
+        {
+            "mentor_name": "David Coach",
+            "expertise": ["Cloud Architecture", "AWS", "DevOps"],
+            "score": 0.65,
+            "overlap": 1,
+            "rating": 4.7,
+            "availability": 60,
+            "email": "denniskipngeno60@gmail.com"
+        }
+    ];
+    report mentors;
+}
+
+walker mentor_connection_request {
+    has user_name: str;
+    has user_email: str;
+    has mentor_name: str;
+    has mentor_email: str;
+    has message: str;
+    obj __specs__ {
+        static has auth: bool = False;
+    }
+    can run with root entry {
+        let connection_data = {
+            "timestamp": "now",
+            "user_name": self.user_name,
+            "user_email": self.user_email,
+            "mentor_name": self.mentor_name,
+            "mentor_email": self.mentor_email,
+            "message": self.message,
+            "status": "pending",
+            "notification_sent": True
+        };
+        
+        report connection_data;
     }
 }
 

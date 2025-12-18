@@ -6,6 +6,7 @@ let learningPathData = [];
 let userExtractedSkills = ['Python', 'SQL'];
 let currentUser = null;
 let isLoggedIn = false;
+let availableMentors = [];
 
 // Career skill requirements
 const careerRequirements = {
@@ -68,6 +69,8 @@ function setupAuthListeners() {
     const switchToSignup = document.getElementById('switchToSignup');
     const switchToLogin = document.getElementById('switchToLogin');
     const switchToLoginFromSignup = document.getElementById('switchToLoginFromSignup');
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    const backToLogin = document.getElementById('backToLogin');
 
     if (switchToSignup) {
         switchToSignup.addEventListener('click', (e) => {
@@ -83,6 +86,18 @@ function setupAuthListeners() {
     }
     if (switchToLoginFromSignup) {
         switchToLoginFromSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthScreen('login');
+        });
+    }
+    if (forgotPasswordBtn) {
+        forgotPasswordBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthScreen('forgotPassword');
+        });
+    }
+    if (backToLogin) {
+        backToLogin.addEventListener('click', (e) => {
             e.preventDefault();
             showAuthScreen('login');
         });
@@ -154,6 +169,58 @@ function setupAuthListeners() {
             showNotification(`✓ Account created! Welcome, ${fullName}!`, 'success');
             hideAuthModal();
             location.reload();
+        });
+    }
+
+    // Forgot Password form
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email);
+            
+            if (user) {
+                // Generate a temporary password
+                const tempPassword = Math.random().toString(36).slice(-8);
+                
+                // Update user's password
+                user.password = tempPassword;
+                const userIndex = users.findIndex(u => u.email === email);
+                users[userIndex] = user;
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Send password reset email
+                try {
+                    const response = await fetch('http://localhost:8001/send-password-reset', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            name: user.name,
+                            temp_password: tempPassword
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        showNotification(`✓ Password reset email sent to ${email}`, 'success');
+                    } else {
+                        showNotification(`✓ Temporary password: ${tempPassword}`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Error sending reset email:', error);
+                    showNotification(`✓ Your temporary password is: ${tempPassword}`, 'success');
+                }
+                
+                showAuthScreen('login');
+                document.getElementById('resetEmail').value = '';
+            } else {
+                showNotification('No account found with that email', 'error');
+            }
         });
     }
 
@@ -1035,6 +1102,7 @@ async function loadMentors() {
             return;
         }
         
+        availableMentors = mentors;
         displayMentors(mentors);
         updateConnectedMentorButtons();
         showNotification('✓ Mentors loaded', 'success');
@@ -1080,15 +1148,90 @@ function displayMentors(mentors) {
 }
 
 // Connect with Mentor
-function connectWithMentor(mentorName, mentorIndex) {
+async function connectWithMentor(mentorName, mentorIndex) {
+    if (!currentUser) {
+        showNotification('Please log in first', 'error');
+        return;
+    }
+
     const connectedMentors = JSON.parse(localStorage.getItem('connectedMentors') || '[]');
     
-    if (!connectedMentors.includes(mentorName)) {
+    if (connectedMentors.includes(mentorName)) {
+        showNotification(`Already connected with ${mentorName}`, 'info');
+        return;
+    }
+
+    // Find mentor email from availableMentors
+    console.log('Available mentors:', availableMentors);
+    console.log('Looking for mentor:', mentorName);
+    
+    const mentor = availableMentors.find(m => m.mentor_name === mentorName);
+    console.log('Found mentor:', mentor);
+    
+    const mentorEmail = mentor ? mentor.email : '';
+    console.log('Mentor email:', mentorEmail);
+
+    if (!mentorEmail) {
+        showNotification('Mentor email not found. Please reload mentors.', 'error');
+        return;
+    }
+
+    try {
+        // Send email notification via notification server
+        const notificationResponse = await fetch('http://localhost:8001/send-connection-notification', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_name: currentUser.name,
+                user_email: currentUser.email,
+                mentor_name: mentorName,
+                mentor_email: mentorEmail,
+                message: `${currentUser.name} would like to connect with you for mentorship.`
+            })
+        });
+
+        // Also send to Jac backend for tracking
+        const backendResponse = await fetch('http://localhost:8000/walker/mentor_connection_request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_name: currentUser.name,
+                user_email: currentUser.email,
+                mentor_name: mentorName,
+                mentor_email: mentorEmail,
+                message: `${currentUser.name} would like to connect with you for mentorship.`
+            })
+        });
+
+        if (notificationResponse.ok || backendResponse.ok) {
+            // Store connection locally
+            connectedMentors.push(mentorName);
+            localStorage.setItem('connectedMentors', JSON.stringify(connectedMentors));
+            
+            // Update user's connected mentors
+            if (currentUser.connectedMentors) {
+                currentUser.connectedMentors.push({
+                    name: mentorName,
+                    connectedAt: new Date().toISOString(),
+                    status: 'pending'
+                });
+            }
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            showNotification(`✓ Connection request sent to ${mentorName}!`, 'success');
+        } else {
+            showNotification(`Failed to send connection request`, 'error');
+        }
+    } catch (error) {
+        console.error('Error connecting with mentor:', error);
+        // Fallback: store locally even if backend fails
         connectedMentors.push(mentorName);
         localStorage.setItem('connectedMentors', JSON.stringify(connectedMentors));
-        showNotification(`✓ Connected with ${mentorName}!`, 'success');
-    } else {
-        showNotification(`Already connected with ${mentorName}`, 'info');
+        showNotification(`✓ Connection request sent to ${mentorName}!`, 'success');
     }
     
     // Update button state

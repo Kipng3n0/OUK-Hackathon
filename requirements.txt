@@ -3,3 +3,6 @@ jac-cloud
 byllm
 streamlit
 requests
+python-dotenv
+fastapi
+uvicorn

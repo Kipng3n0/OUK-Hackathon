@@ -1259,9 +1259,23 @@ body {
 
 .auth-footer {
     text-align: center;
-    margin-top: 1.5rem;
+    margin-top: 20px;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 14px;
+}
+
+.forgot-password-link {
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 10;
+}
+
+.forgot-password-link .link-btn {
+    font-size: 13px;
+    color: var(--text-secondary);
+    pointer-events: auto;
 }
 
 .link-btn {
@@ -1271,12 +1285,20 @@ body {
     cursor: pointer;
     font-weight: 600;
     transition: var(--transition);
-    padding: 0;
+    padding: 4px 8px;
     text-decoration: underline;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .link-btn:hover {
     color: var(--accent-light);
+    text-decoration: none;
+}
+
+.link-btn:active {
+    transform: scale(0.98);
 }
 
 .checkbox-group {
