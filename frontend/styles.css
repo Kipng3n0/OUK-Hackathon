@@ -142,7 +142,19 @@ body {
     align-items: center;
 }
 
-.logo h1 {
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-logo-icon {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+}
+
+.logo-text h1 {
     font-size: 1.8rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
@@ -152,7 +164,7 @@ body {
     margin-bottom: 0.25rem;
 }
 
-.logo .tagline {
+.logo-text .tagline {
     font-size: 0.85rem;
     color: var(--text-secondary);
 }
@@ -435,6 +447,9 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .skill-tag {
@@ -451,6 +466,15 @@ body {
     background: rgba(239, 68, 68, 0.1);
     border-color: #ef4444;
     color: #fca5a5;
+}
+
+/* Card Actions */
+.card-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
 }
 
 /* Path List */
@@ -1221,10 +1245,33 @@ body {
     text-align: center;
 }
 
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.logo-icon {
+    width: 80px;
+    height: 80px;
+    animation: rotateCompass 20s linear infinite;
+}
+
+@keyframes rotateCompass {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 .auth-brand {
     font-size: 2.2rem;
     color: var(--accent-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
     font-weight: 700;
 }
 

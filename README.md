@@ -1,8 +1,8 @@
-# SkillForge AI – Jaseci Hackathon Project
+# SkillForge Navigator – Jaseci Hackathon Project
 
 ## Overview
 
-SkillForge AI is an intelligent career development platform built with the Jac programming language and the Jaseci stack. It models users, skills, careers, learning modules, and mentors as an Object‑Spatial (OSP) graph and uses LLMs (via byLLM) plus a set of collaborating agents to:
+**SkillForge Navigator** is an intelligent career development platform built with the Jac programming language and the Jaseci stack. It models users, skills, careers, learning modules, and mentors as an Object‑Spatial (OSP) graph and uses LLMs (via byLLM) plus a set of collaborating agents to:
 
 - **Seed and manage** a career/skill graph (skills, careers, learning modules, mentors) inside the OSP graph.
 - **Analyze user skills** from resume‑like text and update the graph with detected skills.
@@ -27,7 +27,7 @@ This repository is structured to satisfy the core hackathon requirements end‑t
 - `frontend/app.py`         – Streamlit dashboard that calls Jac walkers via HTTP.
 - `requirements.txt`        – Python dependencies (Jac, byLLM, Streamlit, requests).
 
-You can extend this base into a fuller SkillForge AI system (e.g., richer analytics, additional agents, more careers/skills) as needed.
+You can extend this base into a fuller SkillForge Navigator system (e.g., richer analytics, additional agents, more careers/skills) as needed.
 
 ## Setup
 
@@ -236,4 +236,4 @@ curl -X POST \
   - `seed_demo_data` creates a realistic mini‑graph (demo user, skills, modules, career, mentors) for demo and testing.
   - Career readiness score and learning path length can be used as simple evaluation metrics.
 
-You can further enhance this base by adding more careers/skills, richer prompts, and advanced graph algorithms, but the current scaffold already demonstrates the full SkillForge AI concept in a hackathon‑friendly, runnable form.
+You can further enhance this base by adding more careers/skills, richer prompts, and advanced graph algorithms, but the current scaffold already demonstrates the full SkillForge Navigator concept in a hackathon‑friendly, runnable form.

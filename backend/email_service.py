@@ -128,13 +128,13 @@ def send_user_confirmation(user_email, user_name, mentor_name):
                 </div>
                 
                 <p style="font-size: 14px; margin-top: 20px;">
-                  Continue exploring your learning path on SkillForge AI!
+                  Continue exploring your learning path on SkillForge Navigator!
                 </p>
                 
                 <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                 
                 <p style="font-size: 12px; color: #666; text-align: center;">
-                  SkillForge AI - Smart Career Path Navigator
+                  SkillForge Navigator - Your Smart Career Path Platform
                 </p>
               </div>
             </div>
@@ -171,7 +171,7 @@ def send_password_reset_email(user_email, user_name, temp_password):
         sender_password = os.getenv("SMTP_PASSWORD", "")
         
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = "Password Reset - SkillForge AI"
+        msg["Subject"] = "Password Reset - SkillForge Navigator"
         msg["From"] = sender_email
         msg["To"] = user_email
         
@@ -187,7 +187,7 @@ def send_password_reset_email(user_email, user_name, temp_password):
                 </p>
                 
                 <p style="font-size: 16px; margin-bottom: 15px;">
-                  We received a request to reset your password for your SkillForge AI account.
+                  We received a request to reset your password for your SkillForge Navigator account.
                 </p>
                 
                 <div style="background-color: #fff3cd; padding: 20px; border-left: 4px solid #ff8c00; margin: 20px 0;">
