@@ -12,9 +12,9 @@
 - **Plan a learning path** (ordered skills) using prerequisites in the OSP graph.
 - **Update market demand** scores for skills from job‑style text snippets.
 - **Match mentors to learners** based on overlapping skills and availability.
-- **Expose walkers** as HTTP endpoints (via `jac serve`) and provide a small Streamlit dashboard as the client UI.
+- **Expose walkers** as HTTP endpoints (via `jac serve`) and provide a small static web frontend (HTML/CSS/JS) served via a simple static server as the client UI.
 
-This repository is structured to satisfy the core hackathon requirements end‑to‑end: Jac + OSP, byLLM, multi‑agent design, and a client (Streamlit) calling walkers over HTTP.
+This repository is structured to satisfy the core hackathon requirements end‑to‑end: Jac + OSP, byLLM, multi‑agent design, and a static web client (HTML/CSS/JS) calling backend services over HTTP.
 
 ## Repository Structure
 
@@ -24,8 +24,10 @@ This repository is structured to satisfy the core hackathon requirements end‑t
   - Multi‑agent walkers (Skill Analyzer, Content Curator, Progress Mentor, Evaluation, Career Readiness, Learning Path, Market Intelligence, Mentor Match).
   - A `seed_demo_data` walker to build a small demo graph.
   - A `get_skill_graph` walker to inspect skills from the root.
-- `frontend/app.py`         – Streamlit dashboard that calls Jac walkers via HTTP.
-- `requirements.txt`        – Python dependencies (Jac, byLLM, Streamlit, requests).
+- `frontend/index.html`     – Web UI entry point (static HTML)
+- `frontend/app.js`         – Frontend logic (fetch, UI interactions)
+- `frontend/styles.css`     – Frontend styles
+- `requirements.txt`        – Python dependencies (Jac/byLLM, FastAPI, Uvicorn, python-dotenv, requests)
 
 You can extend this base into a fuller SkillForge Navigator system (e.g., richer analytics, additional agents, more careers/skills) as needed.
 
@@ -42,9 +44,7 @@ You can extend this base into a fuller SkillForge Navigator system (e.g., richer
    The backend uses `byllm.lib.Model` as in the official Jac byLLM quickstart. You must set an API key for the chosen provider (e.g., Gemini or OpenAI) before calling any byLLM‑powered functions:
 
    ```bash
-   export GEMINI_API_KEY="your-api-key-here"   # if using the default gemini model
-   # or
-   export OPENAI_API_KEY="your-api-key-here"   # if you change the model to an OpenAI one
+   export GEMINI_API_KEY="your-api-key-here"
    ```
 
 ## Running the Demo Backend
@@ -67,33 +67,48 @@ The `with entry` block at the bottom of `skillforge.jac` spawns the `seed_demo_d
 - Creates `LearningModule` nodes and connects them to skills.
 - Connects the user to some skills, modules, and a target career using **typed edges**.
 
-### 2. Start an API Server
+### 2. Start Backend Servers
 
-To expose walkers as HTTP endpoints for use from Jac Client, Postman, or curl:
+From the project root, use the startup script (starts BOTH servers):
 
 ```bash
-jac serve backend/skillforge.jac
+cd skillforge_ai
+chmod +x start_backend.sh
+./start_backend.sh
 ```
 
-By default, Jaseci will start an API server on `http://localhost:8000`. Walkers that have abilities marked `with root entry` are reachable as endpoints.
-
-### 3. Run the Streamlit Frontend
-
-In a new terminal (still inside the project root), start the dashboard:
+This launches:
+- Notification server at http://localhost:8001
+- Jac backend at http://localhost:8000
+### Manual backend server run commands
+Terminal 1:
 
 ```bash
-streamlit run frontend/app.py
-### use this instead
+cd skillforge_ai
+## Activate Virtual Environment
+cd backend
+python notification_server.py
+```
+Terminal 2:
+```bash
+cd skillforge_ai
+cd backend 
+jac run skillforge.jac 
+jac serve skillforge.jac
+```
+
+### 3. Run the Frontend
+
+In a new terminal:
+
+```bash
+cd skillforge_ai
+## Activate virtual environment
+cd frontend
 python3 -m http.server 8080
 ```
 
-By default, it expects the Jac server at `http://localhost:8000`. To point to a different URL, set:
-
-```bash
-export JAC_SERVER_URL="http://localhost:8000"
-```
-
-Then open the URL that Streamlit prints (typically `http://localhost:8501`).
+Open http://localhost:8080 in your browser.
 
 ## Core Backend Design
 
@@ -155,8 +170,6 @@ In `backend/skillforge.jac`:
   - `def extract_skills_from_job(job_description: str) -> list by llm();`
   - `def generate_motivation_message(struggle_areas: list) -> str by llm();`
 
-You can later refine prompts and model choices according to hackathon needs (e.g., use `agentic_ai` patterns from official docs).
-
 ### Multi-Agent Walkers
 
 Each agent is represented as a dedicated walker whose abilities can be invoked from API clients (or other walkers):
@@ -184,42 +197,6 @@ Each agent is represented as a dedicated walker whose abilities can be invoked f
   - Ability `run` (with `root entry`) creates a small connected OSP graph with a demo user, skills (Python, TensorFlow, SQL), a sample career (AI Engineer), learning modules, and mentors.
 - `walker get_skill_graph`
   - Ability `for_user` (with `root entry`) reports the list of `Skill` nodes reachable from `root` for visualization or inspection.
-
-## Example API Usage (curl)
-
-After running `jac serve backend/skillforge.jac`, you can call walkers via HTTP. The exact JSON shape can depend on your Jaseci version, but a typical pattern is:
-
-> Note: Adjust URL paths according to the `jac serve` output if needed.
-
-### Trigger Content Curator Agent
-
-```bash
-curl -X POST \
-  http://localhost:8000/walker/content_curator_agent.generate \
-  -H "Content-Type: application/json" \
-  -d '{"skill_name": "Python", "level": "beginner"}'
-```
-
-### Get Skill Graph Snapshot
-
-```bash
-curl -X POST \
-  http://localhost:8000/walker/get_skill_graph.for_user \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-### Ask the Progress Mentor for a Summary
-
-```bash
-curl -X POST \
-  http://localhost:8000/walker/progress_mentor_agent.summarize \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-(For a polished submission, you can tune these endpoints and JSON bodies according to your `jac serve` introspection or Postman tests.)
-
 ## Mapping to Hackathon Requirements
 
 - **Jac + OSP graph**: Custom `User`, `Skill`, `Career`, `LearningModule`, and `Mentor` nodes and named edges `HasSkill`, `Requires`, `PrerequisiteFor`, `Teaches`, `Learning`, `InterestedIn`, `ExpertIn`.
@@ -230,10 +207,9 @@ curl -X POST \
 - **byLLM integration**: Global `Model` instance plus multiple byLLM functions for both generative and analytical uses (resume skill extraction, challenge generation, code evaluation, progress summaries, job skill extraction, motivation messages).
 - **Multi‑agent design**: Eight clearly defined agents (Skill Analyzer, Content Curator, Progress Mentor, Evaluation, Career Readiness, Learning Path, Market Intelligence, Mentor Match) with documented responsibilities.
 - **Frontend / client**:
-  - Streamlit dashboard (`frontend/app.py`) calling Jac walkers via HTTP (`call_walker` helper).
-  - Pages: Dashboard (career readiness + learning path), Skill Graph snapshot, Coding Challenge (generate + evaluate), Mentor Match.
+  - Static web UI (`frontend/index.html`, `frontend/app.js`, `frontend/styles.css`) served with `python3 -m http.server 8080`.
+  - Pages: Dashboard, Skill Graph, Learning Path, Job Market, Mentors, Profile.
 - **Data & evaluation**:
   - `seed_demo_data` creates a realistic mini‑graph (demo user, skills, modules, career, mentors) for demo and testing.
   - Career readiness score and learning path length can be used as simple evaluation metrics.
 
-You can further enhance this base by adding more careers/skills, richer prompts, and advanced graph algorithms, but the current scaffold already demonstrates the full SkillForge Navigator concept in a hackathon‑friendly, runnable form.
