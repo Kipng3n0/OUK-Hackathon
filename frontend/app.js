@@ -616,7 +616,7 @@ async function analyzeCareerReadiness() {
     currentUser.target_career = career;
     
     try {
-        showNotification(`Analyzing readiness for ${career}...`, 'info');
+        
         
         // Calculate readiness based on extracted skills
         const readinessScore = calculateReadiness(career, userExtractedSkills);
@@ -631,7 +631,6 @@ async function analyzeCareerReadiness() {
             displayLearningPath(path);
         }
         
-        showNotification(`✓ Analysis complete for ${career}!`, 'success');
     } catch (error) {
         showNotification('Error analyzing career readiness', 'error');
     }
@@ -803,7 +802,6 @@ async function loadSkillGraph() {
         // Draw simple chart
         setTimeout(() => drawSkillChart(skills), 100);
         
-        showNotification('✓ Skills loaded successfully', 'success');
     } catch (error) {
         console.error('Error loading skills:', error);
         showNotification('Error loading skills', 'error');
@@ -888,7 +886,7 @@ async function loadLearningPath() {
         // Display sample courses
         displaySampleCourses(path);
         
-        showNotification('✓ Learning path loaded', 'success');
+        
     } catch (error) {
         showNotification('Error loading learning path', 'error');
     }
@@ -982,7 +980,7 @@ async function loadJobMarket() {
         // Draw demand chart
         setTimeout(() => drawDemandChart(skills), 100);
         
-        showNotification('✓ Job market data loaded', 'success');
+        
     } catch (error) {
         console.error('Error loading job market:', error);
         showNotification('Error loading job market', 'error');
@@ -1136,7 +1134,7 @@ async function loadMentors() {
         console.log('Loaded mentors:', availableMentors);
         displayMentors(mentors);
         updateConnectedMentorButtons();
-        showNotification('✓ Mentors loaded', 'success');
+        
     } catch (error) {
         console.error('Error loading mentors:', error);
         showNotification('Error loading mentors', 'error');
